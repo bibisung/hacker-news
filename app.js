@@ -1,17 +1,35 @@
-const { domainToUnicode } = require("url");
+const container = document.getElementById('root')
+const ajax = new XMLHttpRequest();
+const content = document.createElement("div");
+const NEWS_URL = "https://api.hnpwa.com/v0/news/1.json";
+const CONTENT_URL = "https://api.hnpwa.com/v0/item/@id.json";
 
-let ajax = new XMLHttpRequest();
-
-ajax.open('GET', 'https://api.hnpwa.com/v0/news/1.json', false);
+ajax.open("GET", NEWS_URL, false);
 ajax.send();
 
 const newsFeed = JSON.parse(ajax.response);
-const ulEl = document.createElement('ul');
+const ul = document.createElement("ul");
+
+window.addEventListener("hashchange", () => {
+  const id = location.hash.substr(1);
+  ajax.open("GET", CONTENT_URL.replace("@id", id), false);
+  ajax.send();
+
+  const newsContent = JSON.parse(ajax.response);
+  const title = document.createElement('h1');
+
+  title.innerHTML = newsContent.title;
+  content.appendChild(title);
+});
 
 for (let i = 0; i < 10; i++) {
-  const liEl = document.createElement('li');
-  liEl.innerHTML = newsFeed[i].title;
-  ulEl.appendChild(liEl);
+  const li = document.createElement("li");
+  const a = document.createElement("a");
+  a.href = `#${newsFeed[i].id}`;
+  a.innerHTML = `${newsFeed[i].title} [${newsFeed[i].comments_count}]`;
+  li.appendChild(a);
+  ul.appendChild(li)
 }
 
-document.getElementById('root').appendChild(ulEl);
+container.appendChild(ul);
+container.appendChild(content);
