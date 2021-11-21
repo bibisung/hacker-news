@@ -46,12 +46,12 @@ function newsFeed() {
         </div>
       </div>
       <div class="p-4 text-2xl text-gray-700">
-        {{__news_feed__}}        
+        {{__news_feed__}}    
       </div>
     </div>
   `;
 
-  if(newsFeed.length === 0) {
+  if (newsFeed.length === 0) {
     newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
   }
 
@@ -81,6 +81,7 @@ function newsFeed() {
   template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
   template = template.replace('{{__next_page__}}', store.currentPage + 1);
 
+  console.log(store.feeds);
   container.innerHTML = template;
 }
 
@@ -115,9 +116,9 @@ function newsDetail() {
       </div>
     </div>
   `;
-  
-  for (let i =0; i<store.feeds.length; i++) {
-    if(store.feeds[i].id === Number(id)) {
+
+  for (let i = 0; i < store.feeds.length; i++) {
+    if (store.feeds[i].id === Number(id)) {
       store.feeds[i].read = true;
       break;
     }
@@ -126,7 +127,7 @@ function newsDetail() {
   function makeComment(comments, called = 0) {
     const commentString = [];
 
-    for(let i = 0; i < comments.length; i++) {
+    for (let i = 0; i < comments.length; i++) {
       commentString.push(`
         <div style="padding-left: ${called * 40}px;" class="mt-4">
           <div class="text-gray-400">
