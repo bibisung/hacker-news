@@ -1,7 +1,6 @@
 {
   "name": "hacker-news",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "dev": "parcel index.html",
@@ -10,7 +9,17 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bibisung/hacker-news.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bibisung/hacker-news/issues"
+  },
+  "homepage": "https://github.com/bibisung/hacker-news#readme",
+  "description": "",
+  "devDependencies": {
     "parcel-bundler": "^1.12.5"
   }
 }
