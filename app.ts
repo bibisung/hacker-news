@@ -53,7 +53,7 @@ class Api {
 
   constructor(url: string) {
     this.ajax = new XMLHttpRequest();
-    this.url = url;
+    this.url = url
   }
 
   getRequest<AjaxResponse>(): AjaxResponse {
