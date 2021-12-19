@@ -1,43 +1,86 @@
-type Store = {
+interface Store {
   currentPage: number;
   feeds: NewsFeed[];
 }
-type News = {
-  id: number;
-  time_ago: string;
-  title: string;
-  url: string;
-  user: string;
-  content: string;
+interface News {
+  readonly id: number;
+  readonly time_ago: string;
+  readonly title: string;
+  readonly url: string;
+  readonly user: string;
+  readonly content: string;
 }
-type NewsFeed = News & {
-  comments_count: number;
-  points: number;
+interface NewsFeed extends News {
+  readonly comments_count: number;
+  readonly points: number;
   read?: boolean;
 }
-type NewsDetail = News & {
-  comments: NewsComment[];
+interface NewsDetail extends News {
+  readonly comments: NewsComment[];
 }
-type NewsComment = News & {
-  comments: NewsComment[];
-  level: number;
+interface NewsComment extends News {
+  readonly comments: NewsComment[];
+  readonly level: number;
 }
-const container: HTMLElement | null = document.getElementById('root');
+const container: HTMLElement | null = document.getElementById("root");
 const ajax: XMLHttpRequest = new XMLHttpRequest();
-const content = document.createElement('div');
-const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
-const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
+const content = document.createElement("div");
+const NEWS_URL = "https://api.hnpwa.com/v0/news/1.json";
+const CONTENT_URL = "https://api.hnpwa.com/v0/item/@id.json";
 const store: Store = {
   currentPage: 1,
   feeds: [],
 };
 
-function getData<AjaxResponse>(url: string): AjaxResponse {
-  ajax.open('GET', url, false);
-  ajax.send();
+// function applyApiMixins(targetClass: any, baseClasses: any[]): void {
+//   baseClasses.forEach((baseClass) => {
+//     Object.getOwnPropertyNames(baseClass.prototype).forEach((name) => {
+//       const descriptor = Object.getOwnPropertyDescriptor(
+//         baseClass.prototype,
+//         name
+//       );
 
-  return JSON.parse(ajax.response);
+//       if (descriptor) {
+//         Object.defineProperty(targetClass.prototype, name, descriptor);
+//       }
+//     });
+//   });
+// }
+
+class Api {
+  ajax: XMLHttpRequest;
+  url: string;
+
+  constructor(url: string) {
+    this.ajax = new XMLHttpRequest();
+    this.url = url;
+  }
+
+  getRequest<AjaxResponse>(): AjaxResponse {
+    this.ajax.open("GET", this.url, false);
+    this.ajax.send();
+
+    return JSON.parse(this.ajax.response);
+  }
 }
+
+class NewsFeedApi extends Api {
+  getData(): NewsFeed[] {
+    return this.getRequest<NewsFeed[]>();
+  }
+}
+
+class NewsDetailApi extends Api {
+  getData(): NewsDetail {
+    return this.getRequest<NewsDetail>();
+  }
+}
+
+// interface NewsFeedApi extends Api {};
+// interface NewsDetailApi extends Api {};
+
+// applyApiMixins(NewsFeedApi, [Api]);
+// applyApiMixins(NewsDetailApi, [Api]);
 
 function makeFeeds(feeds: NewsFeed[]): NewsFeed[] {
   for (let i = 0; i < feeds.length; i++) {
@@ -51,10 +94,11 @@ function updateView(html: string): void {
   if (container) {
     container.innerHTML = html;
   } else {
-    console.log('최상위 컨테이너가 없어 UI를 진행하지 못합니다.');
+    console.log("최상위 컨테이너가 없어 UI를 진행하지 못합니다.");
   }
 }
 function newsFeed(): void {
+  const api = new NewsFeedApi(NEWS_URL);
   let newsFeed: NewsFeed[] = store.feeds;
   const newsList = [];
   let template = `
@@ -83,18 +127,22 @@ function newsFeed(): void {
   `;
 
   if (newsFeed.length === 0) {
-    newsFeed = store.feeds = makeFeeds(getData<NewsFeed[]>(NEWS_URL));
+    newsFeed = store.feeds = makeFeeds(api.getData());
   }
 
   for (let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
     newsList.push(`
-      <div class="p-6 ${newsFeed[i].read ? 'bg-red-500' : 'bg-white'} mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
+      <div class="p-6 ${
+        newsFeed[i].read ? "bg-red-500" : "bg-white"
+      } mt-6 rounded-lg shadow-md transition-colors duration-500 hover:bg-green-100">
         <div class="flex">
           <div class="flex-auto">
             <a href="#/show/${newsFeed[i].id}">${newsFeed[i].title}</a>  
           </div>
           <div class="text-center text-sm">
-            <div class="w-10 text-white bg-green-300 rounded-lg px-0 py-2">${newsFeed[i].comments_count}</div>
+            <div class="w-10 text-white bg-green-300 rounded-lg px-0 py-2">${
+              newsFeed[i].comments_count
+            }</div>
           </div>
         </div>
         <div class="flex mt-3">
@@ -108,16 +156,23 @@ function newsFeed(): void {
     `);
   }
 
-  template = template.replace('{{__news_feed__}}', newsList.join(''));
-  template = template.replace('{{__prev_page__}}', String(store.currentPage > 1 ? store.currentPage - 1 : 1));
-  template = template.replace('{{__next_page__}}', String(store.currentPage + 1));
+  template = template.replace("{{__news_feed__}}", newsList.join(""));
+  template = template.replace(
+    "{{__prev_page__}}",
+    String(store.currentPage > 1 ? store.currentPage - 1 : 1)
+  );
+  template = template.replace(
+    "{{__next_page__}}",
+    String(store.currentPage + 1)
+  );
 
   updateView(template);
 }
 
 function newsDetail(): void {
   const id = location.hash.substr(7);
-  const newsContent = getData<NewsDetail>(CONTENT_URL.replace('@id', id));
+  const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
+  const newsDetail: NewsDetail = api.getData();
   let template = `
     <div class="bg-gray-600 min-h-screen pb-8">
       <div class="bg-white text-xl">
@@ -136,9 +191,9 @@ function newsDetail(): void {
       </div>
 
       <div class="h-full border rounded-xl bg-white m-6 p-4 ">
-        <h2>${newsContent.title}</h2>
+        <h2>${newsDetail.title}</h2>
         <div class="text-gray-400 h-20">
-          ${newsContent.content}
+          ${newsDetail.content}
         </div>
 
         {{__comments__}}
@@ -154,7 +209,9 @@ function newsDetail(): void {
     }
   }
 
-  updateView(template.replace('{{__comments__}}', makeComment(newsContent.comments)));
+  updateView(
+    template.replace("{{__comments__}}", makeComment(newsDetail.comments))
+  );
 }
 
 function makeComment(comments: NewsComment[]): string {
@@ -177,15 +234,15 @@ function makeComment(comments: NewsComment[]): string {
     }
   }
 
-  return commentString.join('');
+  return commentString.join("");
 }
 
 function router(): void {
   const routePath = location.hash;
 
-  if (routePath === '') {
+  if (routePath === "") {
     newsFeed();
-  } else if (routePath.indexOf('#/page/') >= 0) {
+  } else if (routePath.indexOf("#/page/") >= 0) {
     store.currentPage = Number(routePath.substr(7));
     newsFeed();
   } else {
@@ -193,6 +250,6 @@ function router(): void {
   }
 }
 
-window.addEventListener('hashchange', router);
+window.addEventListener("hashchange", router);
 
 router();
