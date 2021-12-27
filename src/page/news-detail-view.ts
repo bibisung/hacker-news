@@ -12,7 +12,7 @@ const template = `
           <h1 class="font-extrabold">Hacker News</h1>
         </div>
         <div class="items-center justify-end">
-          <a href="#/page/{__currentPage__}" class="text-gray-500">
+          <a href="#/page/{{__currentPage__}}" class="text-gray-500">
             <i class="fa fa-times"></i>
           </a>
         </div>
@@ -21,9 +21,9 @@ const template = `
   </div>
 
   <div class="h-full border rounded-xl bg-white m-6 p-4 ">
-    <h2>{__title__}</h2>
+    <h2>{{__title__}}</h2>
     <div class="text-gray-400 h-20">
-      {__content__}
+      {{__content__}}
     </div>
 
     {{__comments__}}
@@ -52,13 +52,11 @@ export default class NewsDetailView extends View {
     this.setTemplateData('comments', this.makeComment(newsDetail.comments));
     this.setTemplateData('currentPage', String(window.store.currentPage));
     this.setTemplateData('title', newsDetail.title);
-    this.setTemplateData('title', newsDetail.content);
+    this.setTemplateData('content', newsDetail.content);
     this.updateView();
   }
 
   private makeComment(comments: NewsComment[]): string {
-    const commentString = [];
-
     for (let i = 0; i < comments.length; i++) {
       const comment: NewsComment = comments[i];
       this.addHtml(`
