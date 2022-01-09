@@ -1,6 +1,7 @@
 import View from '../core/view';
 import { NewsDetailApi } from '../core/api';
-import { NewsComment, NewsDetail, NewsStore } from '../types';
+import { NewsDetail, NewsComment, NewsStore } from '../types';
+import { CONTENT_URL } from '../config';
 
 const template = `
 <div class="bg-gray-600 min-h-screen pb-8">
@@ -24,37 +25,38 @@ const template = `
     <div class="text-gray-400 h-20">
       {{__content__}}
     </div>
+
     {{__comments__}}
+
   </div>
 </div>
 `;
 
 export default class NewsDetailView extends View {
   private store: NewsStore;
-
   constructor(containerId: string, store: NewsStore) {
     super(containerId, template);
+
     this.store = store;
   }
 
-  render = async (id: string): Promise<void> => {
-    const api = new NewsDetailApi(id);
-
+  async render(): Promise<void> {
+    const id = location.hash.substring(7);
+    const api = new NewsDetailApi(CONTENT_URL.replace('@id', id));
     const { title, content, comments } = await api.getData();
-
+  
     this.store.makeRead(Number(id));
-    this.setTemplateData('currentPage', this.store.currentPage.toString());
+    this.setTemplateData('comments', this.makeComment(comments));
+    this.setTemplateData('currentPage', String(this.store.currentPage));
     this.setTemplateData('title', title);
     this.setTemplateData('content', content);
-    this.setTemplateData('comments', this.makeComment(comments));
-
+  
     this.updateView();
-  };
+  }
 
   private makeComment(comments: NewsComment[]): string {
     for (let i = 0; i < comments.length; i++) {
       const comment: NewsComment = comments[i];
-
       this.addHtml(`
         <div style="padding-left: ${comment.level * 40}px;" class="mt-4">
           <div class="text-gray-400">

@@ -25,11 +25,11 @@ export default class Store implements NewsStore {
     return this._currentPage > 1 ? this._currentPage - 1 : 1;
   }
   
-  get numberOfFeed() {
+  get numberOfFeed(): number {
     return this.feeds.length;
   }
 
-  get hasFeeds() {
+  get hasFeeds(): boolean {
     return this.feeds.length > 0;
   }
 
@@ -41,14 +41,14 @@ export default class Store implements NewsStore {
     return this.feeds;
   }
 
-  setFeeds = (feeds: NewsFeed[]) => {
+  setFeeds(feeds: NewsFeed[]): void {
     this.feeds = feeds.map(feed => ({
       ...feed, 
       read: false
     }));
   }
 
-  makeRead(id: number) {
+  makeRead(id: number): void {
     const feed = this.feeds.find((feed: NewsFeed) => feed.id === id);
 
     if (feed) {

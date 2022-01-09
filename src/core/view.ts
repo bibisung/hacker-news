@@ -1,17 +1,17 @@
 export default abstract class View {
-  private container: HTMLElement;
   private template: string;
   private renderTemplate: string;
+  private container: HTMLElement;
   private htmlList: string[];
 
   constructor(containerId: string, template: string) {
-    const conatinerElement: HTMLElement | null = document.getElementById(containerId);
+    const containerElement = document.getElementById(containerId);
 
-    if (!conatinerElement) {
+    if (!containerElement) {
       throw '최상위 컨테이너가 없어 UI를 진행하지 못합니다.';
     }
-  
-    this.container = conatinerElement;
+
+    this.container = containerElement;
     this.template = template;
     this.renderTemplate = template;
     this.htmlList = [];
@@ -27,18 +27,18 @@ export default abstract class View {
   }
 
   protected getHtml(): string {
-    const snapshot = this.htmlList.join('');
+    const snapShot = this.htmlList.join('');
     this.clearHtmlList();
-    return snapshot;
+    return snapShot;
   }
 
-  protected setTemplateData(key: string, value: string) {
+  protected setTemplateData(key: string, value: string): void {
     this.renderTemplate = this.renderTemplate.replace(`{{__${key}__}}`, value);
   }
 
-  private clearHtmlList() : void {
+  private clearHtmlList(): void {
     this.htmlList = [];
   }
 
-  abstract render(...params: string[]): void;
+  abstract render(): void;
 }

@@ -1,6 +1,6 @@
 import Router from './core/router';
 import { NewsFeedView, NewsDetailView } from './page';
-import Store from './store';
+import Store from './store'
 
 const store = new Store();
 
@@ -10,8 +10,10 @@ const newsDetailView = new NewsDetailView('root', store);
 
 router.setDefaultPage(newsFeedView);
 
-router.addRoutePath('/page/', newsFeedView, /page\/(\d+)/);
-router.addRoutePath('/show/', newsDetailView, /show\/(\d+)/);
+router.addRoutePath('/page/', newsFeedView);
+router.addRoutePath('/show/', newsDetailView);
+
+router.route();
 
 // MIXIN
 // function applyApiMixins(targetClass: any, baseClasses: any[]): void {

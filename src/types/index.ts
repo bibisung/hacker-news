@@ -22,8 +22,8 @@ export interface News {
 }
 
 export interface NewsFeed extends News {
-  readonly points: number;
   readonly comments_count: number;
+  readonly points: number;
   read?: boolean;
 }
 
@@ -39,5 +39,4 @@ export interface NewsComment extends News {
 export interface RouteInfo {
   path: string;
   page: View;
-  params: RegExp | null;
 }

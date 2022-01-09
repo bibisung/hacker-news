@@ -1,31 +1,32 @@
 import View from '../core/view';
 import { NewsFeedApi } from '../core/api';
-import { NewsStore } from '../types';
+import { NewsFeed, NewsStore } from '../types';
+import { NEWS_URL } from '../config';
 
-const template = `
-<div class="bg-gray-600 min-h-screen">
-  <div class="bg-white text-xl">
-    <div class="mx-auto px-4">
-      <div class="flex justify-between items-center py-6">
-        <div class="flex justify-start">
-          <h1 class="font-extrabold">Hacker News</h1>
+const template: string = `
+    <div class="bg-gray-600 min-h-screen">
+      <div class="bg-white text-xl">
+        <div class="mx-auto px-4">
+          <div class="flex justify-between items-center py-6">
+            <div class="flex justify-start">
+              <h1 class="font-extrabold">Hacker News</h1>
+            </div>
+            <div class="items-center justify-end">
+              <a href="#/page/{{__prev_page__}}" class="text-gray-500">
+                Previous
+              </a>
+              <a href="#/page/{{__next_page__}}" class="text-gray-500 ml-4">
+                Next
+              </a>
+            </div>
+          </div> 
         </div>
-        <div class="items-center justify-end">
-          <a href="#/page/{{__prev_page__}}" class="text-gray-500">
-            Previous
-          </a>
-          <a href="#/page/{{__next_page__}}" class="text-gray-500 ml-4">
-            Next
-          </a>
-        </div>
-      </div> 
+      </div>
+      <div class="p-4 text-2xl text-gray-700">
+        {{__news_feed__}}    
+      </div>
     </div>
-  </div>
-  <div class="p-4 text-2xl text-gray-700">
-    {{__news_feed__}}        
-  </div>
-</div>
-`;
+    `;
 
 export default class NewsFeedView extends View {
   private api: NewsFeedApi;
@@ -34,12 +35,12 @@ export default class NewsFeedView extends View {
   constructor(containerId: string, store: NewsStore) {
     super(containerId, template);
 
+    this.api = new NewsFeedApi(NEWS_URL);
     this.store = store;
-    this.api = new NewsFeedApi();
   }
 
-  render = async (page: string = '1'): Promise<void> => {
-    this.store.currentPage = Number(page);
+  async render(): Promise<void> {
+    this.store.currentPage = Number(location.hash.substring(7) || 1);
 
     if (!this.store.hasFeeds) {
       this.store.setFeeds(await this.api.getData());
@@ -47,7 +48,6 @@ export default class NewsFeedView extends View {
 
     for (let i = (this.store.currentPage - 1) * 10; i < this.store.currentPage * 10; i++) {
       const { id, title, comments_count, user, points, time_ago, read } = this.store.getFeed(i);
-
       this.addHtml(`
         <div class="p-6 ${
           read ? 'bg-red-500' : 'bg-white'
@@ -76,5 +76,5 @@ export default class NewsFeedView extends View {
     this.setTemplateData('next_page', String(this.store.nextPage));
 
     this.updateView();
-  };
+  }
 }
